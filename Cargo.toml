@@ -1,0 +1,22 @@
+[package]
+name = "good-game-rusty-pong"
+version = "0.1.0"
+description = "Rollback netcode Pong game"
+edition = "2021"
+homepage = "https://github.com/IdoKendo/good-game-rusty-pong"
+repository = "https://github.com/IdoKendo/good-game-rusty-pong"
+readme = "README.md"
+keywords = ["game", "graphics", "piston"]
+categories = ["games"]
+license = "MIT"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+async-executor = "1.4.1"
+bytemuck = { version = "1.7.3", features = ["derive"] }
+ggrs = { version = "0.9"}
+macroquad = "0.3"
+matchbox_socket = { version = "0.3.0", features = ["ggrs-socket"] }
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
