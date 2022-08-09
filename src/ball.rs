@@ -17,6 +17,8 @@ pub struct Ball {
     pub vel_x: i32,
     /// Ball's Y velocity
     pub vel_y: i32,
+    /// True if the ball change direction in the last frame
+    pub changed_direction: bool,
 }
 
 impl Ball {
@@ -29,6 +31,7 @@ impl Ball {
     /// assert_eq!(ball.pos_y, 0);
     /// assert_eq!(ball.vel_x, INITIAL_VELOCITY);
     /// assert_eq!(ball.vel_y, INITIAL_VELOCITY);
+    /// assert_eq!(ball.changed_direction, false);
     /// ```
     pub fn new() -> Self {
         Ball {
@@ -36,6 +39,7 @@ impl Ball {
             pos_y: 0,
             vel_x: INITIAL_VELOCITY,
             vel_y: INITIAL_VELOCITY,
+            changed_direction: false,
         }
     }
 
@@ -67,9 +71,11 @@ impl Movable for Ball {
     fn perform_movement(&mut self) {
         self.pos_x += self.vel_x;
         self.pos_y += self.vel_y;
+        self.changed_direction = false;
 
         if self.pos_x > EDGE_RIGHT || self.pos_x < EDGE_LEFT {
             self.vel_x = -self.vel_x;
+            self.changed_direction = true;
         }
 
         if self.pos_y > EDGE_TOP || self.pos_y < EDGE_BOTTOM {
@@ -101,6 +107,7 @@ mod tests {
         assert_eq!(ball.pos_y, initial_y + ball.vel_y);
         assert_eq!(ball.vel_x, initial_vel_x);
         assert_eq!(ball.vel_y, initial_vel_y);
+        assert_eq!(ball.changed_direction, false);
     }
 
     #[test]
@@ -116,6 +123,7 @@ mod tests {
         assert_eq!(ball.pos_y, initial_y + ball.vel_y);
         assert_eq!(ball.vel_x, -initial_vel_x);
         assert_eq!(ball.vel_y, initial_vel_y);
+        assert_eq!(ball.changed_direction, true);
     }
 
     #[test]
@@ -132,6 +140,7 @@ mod tests {
         assert_eq!(ball.pos_y, initial_y + ball.vel_y);
         assert_eq!(ball.vel_x, -initial_vel_x);
         assert_eq!(ball.vel_y, initial_vel_y);
+        assert_eq!(ball.changed_direction, true);
     }
 
     #[test]
@@ -147,6 +156,7 @@ mod tests {
         assert_eq!(ball.pos_y, initial_y - ball.vel_y);
         assert_eq!(ball.vel_x, initial_vel_x);
         assert_eq!(ball.vel_y, -initial_vel_y);
+        assert_eq!(ball.changed_direction, false);
     }
 
     #[test]
@@ -163,6 +173,7 @@ mod tests {
         assert_eq!(ball.pos_y, initial_y - ball.vel_y);
         assert_eq!(ball.vel_x, initial_vel_x);
         assert_eq!(ball.vel_y, -initial_vel_y);
+        assert_eq!(ball.changed_direction, false);
     }
 
     #[test]

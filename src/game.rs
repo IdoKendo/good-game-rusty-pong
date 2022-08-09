@@ -1,5 +1,6 @@
 use async_executor::LocalExecutor;
 use ggrs::InputStatus;
+use macroquad::audio::{load_sound, play_sound_once, Sound};
 use macroquad::prelude::*;
 use macroquad::{
     text::{load_ttf_font, Font},
@@ -20,6 +21,7 @@ pub struct Game<'a> {
     executor: LocalExecutor<'a>,
     lobby: Lobby,
     socket: Option<WebRtcSocket>,
+    sound_played: usize,
 }
 
 impl<'a> Game<'a> {
@@ -30,11 +32,16 @@ impl<'a> Game<'a> {
             game_state: GameState::new(),
             lobby: Lobby::new(logo),
             socket: None,
+            sound_played: 0,
         }
     }
 
     pub async fn run(&mut self) {
         let font = load_ttf_font(FONT_PATH).await.unwrap();
+        let sounds = vec![
+            load_sound("assets/left.wav").await.unwrap(),
+            load_sound("assets/right.wav").await.unwrap(),
+        ];
 
         loop {
             clear_background(BLACK);
@@ -42,7 +49,7 @@ impl<'a> Game<'a> {
             match &mut self.screen_state {
                 ScreenState::Lobby => self.run_lobby(font),
                 ScreenState::Connecting => self.run_connecting(),
-                ScreenState::Game => self.run_game(font),
+                ScreenState::Game => self.run_game(font, &sounds),
             }
 
             next_frame().await;
@@ -63,12 +70,12 @@ impl<'a> Game<'a> {
 
     fn run_connecting(&mut self) {}
 
-    fn run_game(&mut self, font: Font) {
+    fn run_game(&mut self, font: Font, sounds: &Vec<Sound>) {
         request_new_screen_size(SCREEN_WIDTH, SCREEN_HEIGHT);
         clear_background(BLACK);
 
         let inputs = self.game_state.local_input();
-        self.game_state.advance((inputs, InputStatus::Confirmed));
+        let play_sound = self.game_state.advance((inputs, InputStatus::Confirmed));
 
         if self.game_state.ball.pos_x > EDGE_RIGHT
             && self
@@ -80,9 +87,7 @@ impl<'a> Game<'a> {
                 process::exit(0);
             }
             self.game_state.ball.reset_position();
-        }
-
-        if self.game_state.ball.pos_x < EDGE_LEFT
+        } else if self.game_state.ball.pos_x < EDGE_LEFT
             && self
                 .game_state
                 .ball
@@ -92,6 +97,9 @@ impl<'a> Game<'a> {
                 process::exit(0);
             }
             self.game_state.ball.reset_position();
+        } else if play_sound {
+            play_sound_once(sounds[self.sound_played]);
+            self.sound_played = if self.sound_played == 0 { 1 } else { 0 };
         }
 
         self.game_state

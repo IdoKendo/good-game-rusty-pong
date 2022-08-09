@@ -15,6 +15,8 @@ pub struct GameState {
 }
 
 impl GameState {
+    /// Return a new game state with an initial [`Paddle`] for both left and right paddles,
+    /// an initial [`Ball`] for the ball, and frame 0
     pub fn new() -> Self {
         let left_paddle = Paddle::new();
         let right_paddle = Paddle::new();
@@ -28,6 +30,7 @@ impl GameState {
         }
     }
 
+    /// Check for local inputs from the player and return an [`Input`] object
     pub fn local_input(&self) -> Input {
         let mut inp: u8 = 0;
 
@@ -47,7 +50,10 @@ impl GameState {
         Input { inp }
     }
 
-    pub fn advance(&mut self, inputs: (Input, InputStatus)) {
+    /// Advance the game state's by a single frame and handle the moveable objects according to the received [`Input`]
+    /// In case the inputs contain an [`InputStatus::Disconnected`] status, all inputs will be ignored
+    /// Returns a boolean in case the ball changed direction
+    pub fn advance(&mut self, inputs: (Input, InputStatus)) -> bool {
         self.frame += 1;
 
         let movables: Vec<&mut dyn Movable> = vec![
@@ -62,26 +68,28 @@ impl GameState {
         let input = match inputs.1 {
             InputStatus::Confirmed => inputs.0.inp,
             InputStatus::Predicted => inputs.0.inp,
-            InputStatus::Disconnected => 0, // If disconnected, stop all movement
+            InputStatus::Disconnected => 0,
         };
 
         if input & INPUT_LEFT_PADDLE_UP != 0 && input & INPUT_LEFT_PADDLE_DOWN == 0 {
-            self.left_paddle.vel = -1;
+            self.left_paddle.vel = -2;
         }
         if input & INPUT_LEFT_PADDLE_UP == 0 && input & INPUT_LEFT_PADDLE_DOWN != 0 {
-            self.left_paddle.vel = 1;
+            self.left_paddle.vel = 2;
         }
         if input & INPUT_LEFT_PADDLE_UP == 0 && input & INPUT_LEFT_PADDLE_DOWN == 0 {
             self.left_paddle.vel = 0;
         }
         if input & INPUT_RIGHT_PADDLE_UP != 0 && input & INPUT_RIGHT_PADDLE_DOWN == 0 {
-            self.right_paddle.vel = -1;
+            self.right_paddle.vel = -2;
         }
         if input & INPUT_RIGHT_PADDLE_UP == 0 && input & INPUT_RIGHT_PADDLE_DOWN != 0 {
-            self.right_paddle.vel = 1;
+            self.right_paddle.vel = 2;
         }
         if input & INPUT_RIGHT_PADDLE_UP == 0 && input & INPUT_RIGHT_PADDLE_DOWN == 0 {
             self.right_paddle.vel = 0;
         }
+
+        self.ball.changed_direction
     }
 }
