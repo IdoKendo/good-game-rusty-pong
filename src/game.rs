@@ -88,8 +88,8 @@ impl<'a> Game<'a> {
             },
         );
 
-        // if we have enough players - we assume there to be only one local player
-        if socket.connected_peers().len() >= 1 {
+        // if there is a connected peer
+        if !socket.connected_peers().is_empty() {
             // create a new game
             info!("Starting new game...");
             self.game_state = GameState::new();

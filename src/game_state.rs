@@ -94,6 +94,9 @@ impl GameState {
             movable.perform_movement();
         }
 
+        let mut detected_left = false;
+        let mut detected_right = false;
+
         for inputs in inputs_vector {
             let input = match inputs.1 {
                 InputStatus::Confirmed => inputs.0.inp,
@@ -103,22 +106,28 @@ impl GameState {
 
             if input & INPUT_LEFT_PADDLE_UP != 0 && input & INPUT_LEFT_PADDLE_DOWN == 0 {
                 self.left_paddle.vel = -2;
+                detected_left = true;
             }
             if input & INPUT_LEFT_PADDLE_UP == 0 && input & INPUT_LEFT_PADDLE_DOWN != 0 {
                 self.left_paddle.vel = 2;
-            }
-            if input & INPUT_LEFT_PADDLE_UP == 0 && input & INPUT_LEFT_PADDLE_DOWN == 0 {
-                self.left_paddle.vel = 0;
+                detected_left = true;
             }
             if input & INPUT_RIGHT_PADDLE_UP != 0 && input & INPUT_RIGHT_PADDLE_DOWN == 0 {
                 self.right_paddle.vel = -2;
+                detected_right = true;
             }
             if input & INPUT_RIGHT_PADDLE_UP == 0 && input & INPUT_RIGHT_PADDLE_DOWN != 0 {
                 self.right_paddle.vel = 2;
+                detected_right = true;
             }
-            if input & INPUT_RIGHT_PADDLE_UP == 0 && input & INPUT_RIGHT_PADDLE_DOWN == 0 {
-                self.right_paddle.vel = 0;
-            }
+        }
+
+        if !detected_left {
+            self.left_paddle.vel = 0;
+        }
+
+        if !detected_right {
+            self.right_paddle.vel = 0;
         }
     }
 }
