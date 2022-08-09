@@ -1,5 +1,8 @@
 use ggrs::{Frame, GGRSRequest, GameStateCell, InputStatus, NULL_FRAME};
-use macroquad::prelude::*;
+use macroquad::{
+    audio::{play_sound_once, Sound},
+    prelude::*,
+};
 use serde::{Deserialize, Serialize};
 
 use crate::{
@@ -13,6 +16,7 @@ pub struct GameState {
     frame: i32,
     last_checksum: (Frame, u64),
     periodic_checksum: (Frame, u64),
+    sound_played: usize,
     pub left_paddle: Paddle,
     pub right_paddle: Paddle,
     pub ball: Ball,
@@ -30,18 +34,19 @@ impl GameState {
             frame: 0,
             last_checksum: (NULL_FRAME, 0),
             periodic_checksum: (NULL_FRAME, 0),
+            sound_played: 0,
             left_paddle,
             right_paddle,
             ball,
         }
     }
 
-    pub fn handle_requests(&mut self, requests: Vec<GGRSRequest<GGRSConfig>>) {
+    pub fn handle_requests(&mut self, requests: Vec<GGRSRequest<GGRSConfig>>, sounds: &[Sound]) {
         for request in requests {
             match request {
                 GGRSRequest::LoadGameState { cell, .. } => self.load_game_state(cell),
                 GGRSRequest::SaveGameState { cell, frame } => self.save_game_state(cell, frame),
-                GGRSRequest::AdvanceFrame { inputs } => self.advance(inputs),
+                GGRSRequest::AdvanceFrame { inputs } => self.advance(inputs, sounds.to_vec()),
             }
         }
     }
@@ -82,7 +87,7 @@ impl GameState {
 
     /// Advance the game state's by a single frame and handle the moveable objects according to the received [`Input`]  
     /// In case the inputs contain an [`InputStatus::Disconnected`] status, all inputs will be ignored
-    pub fn advance(&mut self, inputs_vector: Vec<(Input, InputStatus)>) {
+    pub fn advance(&mut self, inputs_vector: Vec<(Input, InputStatus)>, sounds: Vec<Sound>) {
         self.frame += 1;
 
         let movables: Vec<&mut dyn Movable> = vec![
@@ -92,6 +97,11 @@ impl GameState {
         ];
         for movable in movables {
             movable.perform_movement();
+        }
+
+        if self.ball.changed_direction {
+            play_sound_once(sounds[self.sound_played]);
+            self.sound_played = if self.sound_played == 0 { 1 } else { 0 };
         }
 
         let mut detected_left = false;

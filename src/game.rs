@@ -1,6 +1,7 @@
 use async_executor::LocalExecutor;
 use ggrs::{GGRSError, P2PSession, SessionBuilder, SessionState};
 use instant::{Duration, Instant};
+use macroquad::audio::{load_sound, Sound};
 use macroquad::prelude::*;
 use macroquad::{
     text::{load_ttf_font, Font},
@@ -24,6 +25,7 @@ pub struct Game<'a> {
     session: Option<P2PSession<GGRSConfig>>,
     last_update: Instant,
     accumulator: Duration,
+    sounds: Vec<Sound>,
 }
 
 impl<'a> Game<'a> {
@@ -37,11 +39,16 @@ impl<'a> Game<'a> {
             session: None,
             last_update: Instant::now(),
             accumulator: Duration::ZERO,
+            sounds: Vec::new(),
         }
     }
 
     pub async fn run(&mut self) {
         let font = load_ttf_font(FONT_PATH).await.unwrap();
+        self.sounds = vec![
+            load_sound("assets/left.wav").await.unwrap(),
+            load_sound("assets/right.wav").await.unwrap(),
+        ];
 
         loop {
             clear_background(BLACK);
@@ -165,7 +172,7 @@ impl<'a> Game<'a> {
 
                 match session.advance_frame() {
                     Ok(requests) => {
-                        self.game_state.handle_requests(requests);
+                        self.game_state.handle_requests(requests, &self.sounds);
                     }
                     Err(GGRSError::PredictionThreshold) => {}
                     Err(e) => panic!(
