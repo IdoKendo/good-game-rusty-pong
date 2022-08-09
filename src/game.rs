@@ -1,14 +1,13 @@
-use std::process;
-
 use async_executor::LocalExecutor;
-
+use ggrs::InputStatus;
+use macroquad::prelude::*;
 use macroquad::{
-    prelude::{info, BLACK},
     text::{load_ttf_font, Font},
     texture::Texture2D,
     window::{clear_background, next_frame, request_new_screen_size, screen_width},
 };
 use matchbox_socket::WebRtcSocket;
+use std::process;
 
 use crate::{
     game_state::GameState, lobby::Lobby, screen_state::ScreenState, traits::Drawable, EDGE_LEFT,
@@ -67,7 +66,9 @@ impl<'a> Game<'a> {
     fn run_game(&mut self, font: Font) {
         request_new_screen_size(SCREEN_WIDTH, SCREEN_HEIGHT);
         clear_background(BLACK);
-        self.game_state.advance();
+
+        let inputs = self.game_state.local_input();
+        self.game_state.advance((inputs, InputStatus::Confirmed));
 
         if self.game_state.ball.pos_x > EDGE_RIGHT
             && self
