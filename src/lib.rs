@@ -14,7 +14,6 @@ pub const EDGE_BOTTOM: i32 = 1;
 pub const EDGE_LEFT: i32 = 1;
 pub const EDGE_RIGHT: i32 = 502;
 pub const EDGE_TOP: i32 = 332;
-pub const FONT_PATH: &str = "assets/FiraSans-Regular.ttf";
 pub const FONT_SIZE: u16 = 32;
 pub const INITIAL_VELOCITY: i32 = 3;
 pub const INPUT_LEFT_PADDLE_DOWN: u8 = 0b0010;

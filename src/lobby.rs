@@ -1,7 +1,9 @@
 use macroquad::prelude::*;
 
 pub struct Lobby {
+    /// Lobby ID text field
     text_field: String,
+    /// Good Game Rusty Pong Logo
     logo: Texture2D,
 }
 

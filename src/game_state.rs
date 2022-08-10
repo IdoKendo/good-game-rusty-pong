@@ -41,6 +41,7 @@ impl GameState {
         }
     }
 
+    /// Handle GGRS requests and update the game state accordingly.
     pub fn handle_requests(&mut self, requests: Vec<GGRSRequest<GGRSConfig>>, sounds: &[Sound]) {
         for request in requests {
             match request {

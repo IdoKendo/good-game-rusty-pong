@@ -1,10 +1,10 @@
 use async_executor::LocalExecutor;
 use ggrs::{GGRSError, P2PSession, SessionBuilder, SessionState};
 use instant::{Duration, Instant};
-use macroquad::audio::{load_sound, Sound};
+use macroquad::audio::{load_sound_from_bytes, Sound};
 use macroquad::prelude::*;
 use macroquad::{
-    text::{load_ttf_font, Font},
+    text::{load_ttf_font_from_bytes, Font},
     texture::Texture2D,
     window::{clear_background, next_frame, request_new_screen_size, screen_width},
 };
@@ -13,7 +13,7 @@ use matchbox_socket::WebRtcSocket;
 use crate::ggrs_config::GGRSConfig;
 use crate::{
     game_state::GameState, lobby::Lobby, screen_state::ScreenState, traits::Drawable, EDGE_LEFT,
-    EDGE_RIGHT, FONT_PATH, MATCHBOX_ADDR, SCORE_POS_X, SCORE_POS_Y, SCREEN_HEIGHT, SCREEN_WIDTH,
+    EDGE_RIGHT, MATCHBOX_ADDR, SCORE_POS_X, SCORE_POS_Y, SCREEN_HEIGHT, SCREEN_WIDTH,
 };
 
 pub struct Game<'a> {
@@ -44,10 +44,15 @@ impl<'a> Game<'a> {
     }
 
     pub async fn run(&mut self) {
-        let font = load_ttf_font(FONT_PATH).await.unwrap();
+        let font =
+            load_ttf_font_from_bytes(include_bytes!("../assets/FiraSans-Regular.ttf")).unwrap();
         self.sounds = vec![
-            load_sound("assets/left.wav").await.unwrap(),
-            load_sound("assets/right.wav").await.unwrap(),
+            load_sound_from_bytes(include_bytes!("../assets/left.wav"))
+                .await
+                .unwrap(),
+            load_sound_from_bytes(include_bytes!("../assets/right.wav"))
+                .await
+                .unwrap(),
         ];
 
         loop {
